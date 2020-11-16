@@ -1,0 +1,98 @@
+---
+title: "a4_task2_katelyn_toigo"
+author: "Katelyn Toigo"
+date: "11/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(here)
+library(kableExtra)
+library(ggbeeswarm)
+```
+
+## Introduction
+
+....
+
+## Data and Analyses
+
+....
+
+## Exploratory findings
+### Annual juvenile hare trap counts
+
+First, read in the bonanza_hares.csv file.
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+bonanza_hares <- read_csv(here("data", "bonanza_hares.csv"))
+```
+
+Next, wrangle data and create graph.
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+juv_year <- bonanza_hares %>% 
+  filter(age == "j") %>% 
+  select(grid, date, age) %>% 
+  mutate(date_new = mdy(date)) %>% 
+  mutate(year = year(date_new)) %>% 
+  group_by(year) %>% 
+  count(age == "j")
+  
+ggplot(data = juv_year, aes(x = year, y = n)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Juvenile Hares Caught by Year", x = "Year", y = "Number of Juveniles")
+```
+
+The table shows the number of juvenile hares captured each year - both grid sites are combined.
+
+The maximum number of juvenile hares (126) were captured in 1999, and the number of juveniles captured decreased every year until 2004 after this. The minimum number caught in one year were 2, in 2010. The number captured tended to fluctuate.  The number captured each year also depends on the amount of sampling. If sampling cannot be consistent, it might be better to compare data that is standardized (such as number of juveniles caught by day) before comparing the years.
+
+### Visualize juvenile hare weights
+
+Data visualization of juvenile hare weights by sex and site (grid).  Will be including groups where variables were not recorded.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+weights_viz <- bonanza_hares %>% 
+  select(grid, sex, weight)
+
+weights_viz$grid[weights_viz$grid == "bonbs"] <- "Bonanza Black Spruce"
+weights_viz$grid[weights_viz$grid == "bonmat"] <- "Bonanza Mature"
+weights_viz$grid[weights_viz$grid == "bonrip"] <- "Bonanza Riparian"
+    
+ggplot(data = weights_viz, aes(x=sex, y=weight))+
+  geom_boxplot(aes(fill = sex))+
+  facet_wrap(~grid) +
+  labs(title = "Sex vs. Weight Comparison for Snowshoe Hares", x="Sex", y="Weight")
+  
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(data = weights_viz, aes(x=sex, y=weight)) + 
+  geom_beeswarm(aes(color = sex), cex = 1) +
+  facet_wrap(~grid)+
+  geom_boxplot(fill = NA, width = 0.3, outlier.color = NA) +
+  stat_summary(fun=mean, 
+               geom="point", 
+               shape=20, 
+               size=4, 
+               color="black", 
+               fill="black")
+```
+
+
+### Juvenile weight comparison (male and female snowshoe hares)
+
+### Relationship between juvenile weight and hind foot length
+
+## Summary
+
+...
+
+## Citations
+
+...
+
+
