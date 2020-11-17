@@ -13,6 +13,7 @@ library(janitor)
 library(here)
 library(kableExtra)
 library(ggbeeswarm)
+library(effsize)
 ```
 
 ## Introduction
@@ -47,31 +48,30 @@ ggplot(data = juv_year, aes(x = year, y = n)) +
   labs(title = "Juvenile Hares Caught by Year", x = "Year", y = "Number of Juveniles")
 ```
 
-The table shows the number of juvenile hares captured each year - both grid sites are combined.
+**Figure 1.** The number of juvenile hares captured each year at Bonanza Black Spruce, Bonanza Mature, and Bonanza Riparian. Data: Kielland, Chapin, Ruess (2017).
 
 The maximum number of juvenile hares (126) were captured in 1999, and the number of juveniles captured decreased every year until 2004 after this. The minimum number caught in one year were 2, in 2010. The number captured tended to fluctuate.  The number captured each year also depends on the amount of sampling. If sampling cannot be consistent, it might be better to compare data that is standardized (such as number of juveniles caught by day) before comparing the years.
 
+
 ### Visualize juvenile hare weights
 
-Data visualization of juvenile hare weights by sex and site (grid).  Will be including groups where variables were not recorded.
-
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-weights_viz <- bonanza_hares %>% 
-  select(grid, sex, weight)
+weights_sex_viz <- bonanza_hares %>% 
+  select(grid, sex, weight, age) %>% 
+  filter(age == "j")
 
-weights_viz$grid[weights_viz$grid == "bonbs"] <- "Bonanza Black Spruce"
-weights_viz$grid[weights_viz$grid == "bonmat"] <- "Bonanza Mature"
-weights_viz$grid[weights_viz$grid == "bonrip"] <- "Bonanza Riparian"
-    
-ggplot(data = weights_viz, aes(x=sex, y=weight))+
-  geom_boxplot(aes(fill = sex))+
-  facet_wrap(~grid) +
-  labs(title = "Sex vs. Weight Comparison for Snowshoe Hares", x="Sex", y="Weight")
-  
+weights_sex_viz$grid[weights_sex_viz$grid == "bonbs"] <- "Bonanza Black Spruce"
+weights_sex_viz$grid[weights_sex_viz$grid == "bonmat"] <- "Bonanza Mature"
+weights_sex_viz$grid[weights_sex_viz$grid == "bonrip"] <- "Bonanza Riparian"
+
+weights_sex_viz$sex[weights_sex_viz$sex == "f"] <- "Female"
+weights_sex_viz$sex[weights_sex_viz$sex == "m"] <- "Male"
 ```
+
+
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-ggplot(data = weights_viz, aes(x=sex, y=weight)) + 
-  geom_beeswarm(aes(color = sex), cex = 1) +
+ggplot(data = weights_sex_viz, aes(x=sex, y=weight)) + 
+  geom_beeswarm(aes(color = sex)) +
   facet_wrap(~grid)+
   geom_boxplot(fill = NA, width = 0.3, outlier.color = NA) +
   stat_summary(fun=mean, 
@@ -79,11 +79,62 @@ ggplot(data = weights_viz, aes(x=sex, y=weight)) +
                shape=20, 
                size=4, 
                color="black", 
-               fill="black")
+               fill="black") +
+  labs(title = "Sex vs. Weight Comparison for Juvenile Snowshoe Hares", x="Sex", y="Weight (grams)")
 ```
+
+**Figure 2.** Sex versus weight (grams) comparisons for juvenile snowshoe hares at three sites: Bonanza Black Spruce, Bonanza Mature, and Bonanza Riparian. Red (female), teal (male) and grey (NA) points indicate individual observations for weight (grams) of juvenile snowshow hares. Box endpoints indicate the 25^th^ and 75^th^ percentile values; the black line and black point within the box indicate the median and mean value for each species, respectively. Data: Kielland, Chapin, Ruess (2017).  
+
+The mean weight of males at all three sites is, on average, greater than females and hares without a sex identification, though not by much.  The greatest difference can be seen in the Bonanza Riparian site between male weight and NA weight; weights range between below 200 grams up to over 1600 grams at the sites.  There were no juveniles caught at Bonanza Black Spruce that did not have a sex identified.
 
 
 ### Juvenile weight comparison (male and female snowshoe hares)
+
+**Table 1.** Descriptive statistics (mean, standard deviation, and sample size) for male and female juvenile snowshoe hares. Data: Kielland, Chapin, Ruess (2017).
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+juv_hare_table <- weights_sex_viz %>% 
+  na.omit(sex) %>% 
+  group_by(sex) %>% 
+  summarize(
+    mean_weight = round(mean(weight, na.rm = TRUE),2),
+    sd_weight = round(sd(weight, na.rm = TRUE),2),
+    n = n())
+
+juv_hare_table %>% 
+  kable(col.names = c("Sex", "Mean weight (g)", "Standard deviation (g)", "Sample size")) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+
+```{r, include = FALSE}
+female_sample <- weights_sex_viz %>% 
+  filter(sex == "Female") %>% 
+  pull(weight)
+
+male_sample <- weights_sex_viz %>% 
+  filter(sex == "Male") %>% 
+  pull(weight)
+```
+
+```{r, include = FALSE}
+t.test(female_sample, male_sample)
+cohen.d(female_sample, male_sample)
+```
+
+```{r, include = FALSE}
+ggplot(data = weights_sex_viz, aes(x = weight)) +
+  geom_histogram() +
+  facet_wrap(~sex) +
+  labs(x = "Weight (g)", y = "Count")
+
+ggplot(data = weights_sex_viz, aes(sample = weight)) +
+  geom_qq() +
+  facet_wrap(~sex)
+```
+
+
+Males are 90.47 grams larger, on average, than female snowshoe hares.  
 
 ### Relationship between juvenile weight and hind foot length
 
