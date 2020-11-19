@@ -82,7 +82,7 @@ ggplot(data = weights_sex_viz, aes(x=sex, y=weight)) +
   labs(title = "Sex vs. Weight Comparison for Juvenile Snowshoe Hares", x="Sex", y="Weight (grams)")
 ```
 
-**Figure 2.** Sex versus weight (grams) comparisons for juvenile snowshoe hares at three sites: Bonanza Black Spruce, Bonanza Mature, and Bonanza Riparian. Red (female), teal (male) and grey (NA) points indicate individual observations for weight (grams) of juvenile snowshow hares. Box endpoints indicate the 25^th^ and 75^th^ percentile values; the black line and black point within the box indicate the median and mean value for each species, respectively. Data: Kielland, Chapin, Ruess (2017).  
+**Figure 2.** Sex versus weight (grams) comparisons for juvenile snowshoe hares at three sites: Bonanza Black Spruce, Bonanza Mature, and Bonanza Riparian. Red (female), teal (male) and grey (NA - unidentified as male or female) points indicate individual observations for weight (grams) of juvenile snowshow hares. Box endpoints indicate the 25^th^ and 75^th^ percentile values; the black line and black point within the box indicate the median and mean value for each species, respectively. Data: Kielland, Chapin, Ruess (2017).  
 
 The mean weight of males at all three sites is, on average, greater than females and hares without a sex identification, though not by much.  The greatest difference can be seen in the Bonanza Riparian site between male weight and NA weight.  There were no juveniles caught at Bonanza Black Spruce that did not have a sex identified.
 
@@ -134,6 +134,9 @@ female_sd <- sd(female_sample)
 male_sd <- sd(male_sample)
 
 hare_ttest_tidy <- tidy(hare_ttest)
+
+female_sd
+male_sd
 ```
 
 
@@ -148,7 +151,7 @@ ggplot(data = ws_withoutna, aes(sample = weight)) +
   facet_wrap(~sex)
 ```
 
-On average, juvenile male snowshoe hares have a larger weight than juvenile female hares (`r round(male_mean,2)` $\pm$ `r round(male_sd, 2)` and `r round(female_mean,2)` $\pm$ `r round(female_sd, 2)` g, respectively; mean $\pm$ 1 standard deviation). While the absolute difference in means is `r round(male_mean, 2) - round(female_mean, 2)` g (a `r round((male_mean - female_mean)/((male_mean + female_mean)/2)*100, 2)`% difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(hare_ttest_tidy$parameter,2)`) = `r round(hare_ttest_tidy$statistic,2)`, p < 0.001), and the effect size is small (Cohen's *d* = `r round(hare_effsize$estimate,2)`).
+On average, juvenile male snowshoe hares have a higher weight than juvenile female hares (`r round(male_mean,2)` $\pm$ `r round(male_sd, 2)` and `r round(female_mean,2)` $\pm$ `r round(female_sd, 2)` g, respectively; mean $\pm$ 1 standard deviation). While the absolute difference in means is `r round(male_mean, 2) - round(female_mean, 2)` g (a `r round((male_mean - female_mean)/((male_mean + female_mean)/2)*100, 2)`% difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(hare_ttest_tidy$parameter,2)`) = `r round(hare_ttest_tidy$statistic,2)`, p < 0.001), and the effect size is small (Cohen's *d* = `r round(hare_effsize$estimate,2)`).
 
 
 
@@ -187,7 +190,7 @@ juv_hare_cor_tidy
 **Figure 3.** Relationship between hind foot length (mm) and weight (g) for juvenile snowshoe hare. Points indicate individual hare measurements. Linear model summary: $\beta$~1~ = `r round(juv_hare_lm_tidy$estimate[2], 2)` g mm^-1^, p < 0.001, R^2^ = `r round(juv_hare_lm_glance$r.squared,2)`, Pearson's *r* = `r round(juv_hare_cor_tidy$estimate,2)`). 
 Data: Kielland, Chapin, Ruess (2017).
 
-ADD EXPLANATION
+The relationship between hind foot length and weight does not appear extremely linear (Figure 3). Simple linear regression revealed that the length of the hind foot does significantly predict juvenile hare weight (p < 0.001, R^2^ = `r round(juv_hare_lm_glance$r.squared,2)`) with an average slope of $\beta$ = `r round(juv_hare_lm_tidy$estimate[2], 2)` g mm^-1^ (i.e., for each one millimeter increase in hind foot length we expect an average increase in body weight of `r round(juv_hare_lm_tidy$estimate[2], 2)` g). The Pearson's *r* = `r round(juv_hare_cor_tidy$estimate,2)`, which means `r round(juv_hare_cor_tidy$estimate * 100,2)` percent of variance in the weight is predictable from the hind foot length (a weakly positive correlation).  The p < 0.001.  The data is homoscedastic.
 
 
 ## Summary
@@ -196,6 +199,6 @@ ADD EXPLANATION
 
 ## Citations
 
-...
+Kielland, K., F.S. Chapin, R.W. Ruess, and Bonanza Creek LTER. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present ver 22. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14 
 
 
